@@ -58,7 +58,7 @@ namespace SymbolHelper {
 
         private void setupList() {
             FLPwords.Controls.Clear();
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 20; i++) {
                 var control = new SearchWordRowControl();
                 control.Visible = false;
                 FLPwords.Controls.Add(control);

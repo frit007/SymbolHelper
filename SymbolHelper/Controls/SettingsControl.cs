@@ -25,6 +25,7 @@ namespace SymbolHelper {
             var settings = SettingsStorage.getInstance().getSettings();
             CBautoClose.Checked = settings.AutoHide;
             CBselectTextOnOpen.Checked = settings.SelectWordInOriginalProgram;
+            CBconfirmDelete.Checked = settings.ConfirmDelete;
         }
 
         private void label1_Click(object sender, EventArgs e) {
@@ -56,6 +57,14 @@ namespace SymbolHelper {
             var settings = SettingsStorage.getInstance().getSettings();
             if(settings.AutoHide != CBautoClose.Checked) {
                 settings.AutoHide = CBautoClose.Checked;
+                SettingsStorage.getInstance().update(settings);
+            }
+        }
+
+        private void CBconfirmDelete_CheckedChanged(object sender, EventArgs e) {
+            var settings = SettingsStorage.getInstance().getSettings();
+            if (settings.ConfirmDelete != CBconfirmDelete.Checked) {
+                settings.ConfirmDelete = CBconfirmDelete.Checked;
                 SettingsStorage.getInstance().update(settings);
             }
         }

@@ -103,5 +103,52 @@ namespace SymbolHelper.Controls {
                 WindowsDlls.SendMessage(ParentForm.Handle, WindowsDlls.WM_NCLBUTTONDOWN, WindowsDlls.HT_CAPTION, 0);
             }
         }
+
+        private class ControlSearch {
+            public double score;
+            public EditWordRowControl control;
+        }
+
+        private void search() {
+            List<ControlSearch> controls = new List<ControlSearch>();
+            string searchStr = TBsearch.Text;
+            if (searchStr.Length == 0) {
+                // don't change order on empty string (and avoid divions by 0 error)
+                return;
+            }
+            foreach (var control in FLPlist.Controls) {
+                if (control is EditWordRowControl row) {
+                    double score = row.Names.Split(';').Min(name => Helpers.LevenshteinDistance.Compute(name, searchStr) / (double)searchStr.Length);
+                    if (UTF8Helper.hexStringToLetter(row.Code) == searchStr) {
+                        score = 0;
+                    }
+                    controls.Add(new ControlSearch() {
+                        score = score,
+                        control = row
+                    });
+                }
+            }
+
+            controls.Sort((a,b) => {
+                if (a.score == b.score) {
+                    return 0;
+                } else if (a.score > b.score) {
+                    return 1;
+                } else {
+                    return -1;
+                }
+            });
+
+            int index = 0;
+            foreach (var control in controls) {
+                FLPlist.Controls.SetChildIndex(control.control, index);
+                index++;
+            }
+        }
+
+        private void TBsearch_TextChanged(object sender, EventArgs e) {
+            Console.WriteLine("text changed?");
+            search();
+        }
     }
 }

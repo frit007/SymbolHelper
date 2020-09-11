@@ -29,6 +29,7 @@
             this.Bhide = new System.Windows.Forms.Button();
             this.CBselectTextOnOpen = new System.Windows.Forms.CheckBox();
             this.CBautoClose = new System.Windows.Forms.CheckBox();
+            this.CBconfirmDelete = new System.Windows.Forms.CheckBox();
             this.panel2.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -91,10 +92,22 @@
             this.CBautoClose.UseVisualStyleBackColor = true;
             this.CBautoClose.CheckedChanged += new System.EventHandler(this.CBautoClose_CheckedChanged);
             // 
+            // CBconfirmDelete
+            // 
+            this.CBconfirmDelete.AutoSize = true;
+            this.CBconfirmDelete.Location = new System.Drawing.Point(24, 152);
+            this.CBconfirmDelete.Name = "CBconfirmDelete";
+            this.CBconfirmDelete.Size = new System.Drawing.Size(93, 17);
+            this.CBconfirmDelete.TabIndex = 8;
+            this.CBconfirmDelete.Text = "Confirm delete";
+            this.CBconfirmDelete.UseVisualStyleBackColor = true;
+            this.CBconfirmDelete.CheckedChanged += new System.EventHandler(this.CBconfirmDelete_CheckedChanged);
+            // 
             // SettingsControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.CBconfirmDelete);
             this.Controls.Add(this.CBautoClose);
             this.Controls.Add(this.CBselectTextOnOpen);
             this.Controls.Add(this.panel2);
@@ -114,5 +127,6 @@
         private System.Windows.Forms.Button Bhide;
         private System.Windows.Forms.CheckBox CBselectTextOnOpen;
         private System.Windows.Forms.CheckBox CBautoClose;
+        private System.Windows.Forms.CheckBox CBconfirmDelete;
     }
 }

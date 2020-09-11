@@ -16,13 +16,19 @@ namespace SymbolHelper {
         // map userControls to a button so panel kan go to the correct position
         Dictionary<UserControl, Button> userControlButton = new Dictionary<UserControl, Button>();
 
+        // if keepOpenLocks 0 then don't autohide the window
+        int keepOpenLocks = 0;
+
         public MainForm() {
             InitializeComponent();
 
-            KeyHandler.Start((selectedWord) => {
+            KeyHandler.Start((selectedWord, caretPosition) => {
                 WindowState = FormWindowState.Minimized;
                 Show();
                 WindowState = FormWindowState.Normal;
+                //caretPosition.X += -400;
+                //caretPosition.Y += -100;
+                Location = caretPosition;
                 showUserControl(SCsearch);
                 SCsearch.UpdateText(selectedWord);
             }, runOnGui);

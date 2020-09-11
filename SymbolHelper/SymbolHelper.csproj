@@ -76,6 +76,7 @@
     <Compile Include="Controls\EditWordsControl.Designer.cs">
       <DependentUpon>EditWordsControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\tmpSimplified.cs" />
     <Compile Include="Helpers\UTF8Helper.cs" />
     <Compile Include="Helpers\WindowsDlls.cs" />
     <Compile Include="MainForm.cs">

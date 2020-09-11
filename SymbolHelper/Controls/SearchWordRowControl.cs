@@ -14,6 +14,9 @@ namespace SymbolHelper.Controls {
             set {
                 Lnames.Text = value;
             }
+            get {
+                return Lnames.Text;
+            }
         }
         public int Id { get; set; }
         private string code;

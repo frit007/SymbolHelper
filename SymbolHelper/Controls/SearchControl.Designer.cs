@@ -70,12 +70,12 @@
             this.TBsearch.Name = "TBsearch";
             this.TBsearch.Size = new System.Drawing.Size(663, 40);
             this.TBsearch.TabIndex = 0;
-            this.TBsearch.Text = "(doesn\'t work yet)";
             this.TBsearch.TextChanged += new System.EventHandler(this.TBsearch_TextChanged);
             this.TBsearch.KeyDown += new System.Windows.Forms.KeyEventHandler(this.TBsearch_KeyDown);
             // 
             // FLPwords
             // 
+            this.FLPwords.AutoScroll = true;
             this.FLPwords.Dock = System.Windows.Forms.DockStyle.Fill;
             this.FLPwords.Location = new System.Drawing.Point(0, 50);
             this.FLPwords.Name = "FLPwords";

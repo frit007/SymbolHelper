@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,8 +17,17 @@ namespace SymbolHelper.Storage {
     class Storage {
 
         private static Storage instance = new Storage();
-        static string folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SymbolHelper");
+        static string folder = AssemblyDirectory;
         private static string file = Path.Combine(folder, "words.json");
+
+        public static string AssemblyDirectory {
+            get {
+                string codeBase = Assembly.GetExecutingAssembly().CodeBase;
+                UriBuilder uri = new UriBuilder(codeBase);
+                string path = Uri.UnescapeDataString(uri.Path);
+                return Path.GetDirectoryName(path);
+            }
+        }
 
         public static Storage getInstance() {
             return instance;

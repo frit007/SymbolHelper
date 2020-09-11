@@ -9,5 +9,6 @@ namespace SymbolHelper.Storage {
     class Settings {
         public bool SelectWordInOriginalProgram { get; set; } = true;
         public bool AutoHide { get; set; } = true;
+        public bool ConfirmDelete { get; set; } = true;
     }
 }

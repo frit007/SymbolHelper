@@ -33,12 +33,12 @@ namespace SymbolHelper {
 
         private static Thread listenerThread;
         public static InputSimulator inputSimulator = new InputSimulator();
-        private static Action<String> onCombination;
+        private static Action<String, Point> onCombination;
         private static Action<Action> runOnGui;
         private static Stopwatch sw = new Stopwatch();
 
 
-        public static void Start(Action<String> onCombination, Action<Action> runOnGui) {
+        public static void Start(Action<String, Point> onCombination, Action<Action> runOnGui) {
             KeyHandler.runOnGui = runOnGui;
             KeyHandler.onCombination = onCombination;
             listenerThread = new Thread(() => {
@@ -63,7 +63,6 @@ namespace SymbolHelper {
                 SendKeys.SendWait(output);
             }).Start();
         }
-
         public static GUITHREADINFO GetCaretPosition() {
             GUITHREADINFO guiInfo = new GUITHREADINFO();
             guiInfo.cbSize = (uint)Marshal.SizeOf(guiInfo);
@@ -71,6 +70,29 @@ namespace SymbolHelper {
             // Get GuiThreadInfo into guiInfo
             GetGUIThreadInfo(0, out guiInfo);
             return guiInfo;
+        }
+
+        public static void GetCaretPositionAgain() {
+            new Thread(() => {
+                int handle = (int)GetForegroundWindow();
+
+                int foregroundThread = GetWindowThreadProcessId(handle, 0);
+
+                int currentThreadId = GetCurrentThreadId();
+                //int fakethreadid = AppDomain.GetCurrentThreadId();
+
+                int result = AttachThreadInput(foregroundThread, currentThreadId, true);
+
+                GetCaretPos(out Point point);
+
+                int result2 = AttachThreadInput(foregroundThread, currentThreadId, false);
+                
+                GetWindowRect(handle, out RECT rect);
+
+                Console.WriteLine($"x:{point.X} y:{point.Y} r:{result} r2:{result2} procname: {getProcessNameFromHandle(handle)} l:{rect.Left} r:{rect.Right} t:{rect.Top}, b:{rect.Bottom}");
+            }).Start();
+
+            Thread.Sleep(100);
         }
 
         /// <summary>
@@ -83,6 +105,20 @@ namespace SymbolHelper {
             StringBuilder Buff = new StringBuilder(nChars);
             handle = (int)GetForegroundWindow();
 
+            // If Active window has some title info
+            if (GetWindowText(handle, Buff, nChars) > 0) {
+                uint lpdwProcessId;
+                uint dwCaretID = GetWindowThreadProcessId(handle, out lpdwProcessId);
+                uint dwCurrentID = (uint)Thread.CurrentThread.ManagedThreadId;
+                return Process.GetProcessById((int)lpdwProcessId).ProcessName;
+            }
+            // Otherwise either error or non client region
+            return String.Empty;
+        }
+
+        private static string getProcessNameFromHandle(int handle) {
+            const int nChars = 256;
+            StringBuilder Buff = new StringBuilder(nChars);
             // If Active window has some title info
             if (GetWindowText(handle, Buff, nChars) > 0) {
                 uint lpdwProcessId;
@@ -116,6 +152,10 @@ namespace SymbolHelper {
             Clipboard.SetDataObject(dataObject);
         }
 
+        // this method is kind of a mess because we need to switch threads twice, 
+        // once because we need the GUI thread to access the clipboard (if we try the Clipboard clipboard from not gui then it crashes)
+        // again because we any other thread than gui to send keyboard input to the other thread (otherwise it takes a couple of seconds to send input)
+        // then go back to gui because we have to restore the clipboard
         private static string GetLastWord(Action<String> result) {
             runOnGui(() => {
                 //var oldClipboardData = Clipboard.GetDataObject();
@@ -173,22 +213,27 @@ namespace SymbolHelper {
                 isWindowsPressed = isKeyDown;
             }
             if(isWindowsPressed && key == Keys.J && isKeyDown) {
-                //inputSimulator.Keyboard.KeyUp(WindowsInput.Native.VirtualKeyCode.LWIN);
-                //inputSimulator.Keyboard.KeyUp(WindowsInput.Native.VirtualKeyCode.RWIN);
-                //Thread.Sleep(100);
-                //SendKeys.SendWait("Hello");
 
-                //inputSimulator.Keyboard.KeyUp(WindowsInput.Native.VirtualKeyCode.LWIN);
+                GetCaretPositionAgain();
+
+
+                Point caretPosition = new Point();
+                var guiInfo = GetCaretPosition();
+                ClientToScreen(guiInfo.hwndCaret, out caretPosition);
+
+                caretPosition.X = caretPosition.X + (int)guiInfo.rcCaret.Left + 25;
+                caretPosition.Y = caretPosition.Y + (int)guiInfo.rcCaret.Bottom + 25;
+                
 
                 if (SettingsStorage.getInstance().getSettings().SelectWordInOriginalProgram) {
                     GetLastWord((lastWord) => {
                         runOnGui(() => {
-                            onCombination(lastWord);
+                            onCombination(lastWord, caretPosition);
                         });
                     });
                 } else {
                     runOnGui(() => {
-                        onCombination("");
+                        onCombination("", caretPosition);
                     });
                 }
 
@@ -210,10 +255,7 @@ namespace SymbolHelper {
                 //    //Console.WriteLine(guiInfo.cbSize);
 
                 //    //Point caretPosition = new Point();
-                //    //ClientToScreen(guiInfo.hwndCaret, out caretPosition);
 
-                //    //caretPosition.X = caretPosition.X + (int)guiInfo.rcCaret.Left + 25;
-                //    //caretPosition.Y = caretPosition.Y + (int)guiInfo.rcCaret.Bottom + 25;
                 //    //System.Windows.Input.
                 //    //System.Runtime.InteropServices.KeyInterop.
                 //    //Console.WriteLine(caretPosition);
@@ -296,10 +338,42 @@ namespace SymbolHelper {
         [DllImport("user32.dll")]
         private static extern uint GetMessageExtraInfo();
 
+        [DllImport("User32.DLL")]
+        private static extern int SetFocus(int hwnd);
+
+        [DllImport("User32.DLL")]
+        private static extern int GetWindowThreadProcessId(int hWnd, int lpdwProcessId);
+
+        //[DllImport("Kernel32.DLL")]
+        //private static extern int GetCurrentThreadID();
+        [DllImport("kernel32.dll")]
+        static extern int GetCurrentThreadId();
+
+        [DllImport("user32.dll")]
+        static extern bool GetCaretPos(out Point lpPoint);
+
         //[DllImport("kernel32.dll")]
         //public static extern bool Beep(int frequency, int duration);
         [DllImport("kernel32.dll", SetLastError = true)]
         static extern bool Beep(uint dwFreq, uint dwDuration);
+
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool GetWindowRect(int hWnd, out RECT lpRect);
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RECT {
+            public int Left;        // x position of upper-left corner
+            public int Top;         // y position of upper-left corner
+            public int Right;       // x position of lower-right corner
+            public int Bottom;      // y position of lower-right corner
+        }
+
+
+        [DllImport("User32.DLL")]
+        private static extern int AttachThreadInput(int CurrentForegroundThread, int MakeThisThreadForegrouond, bool boolAttach);
+
 
         #endregion
 

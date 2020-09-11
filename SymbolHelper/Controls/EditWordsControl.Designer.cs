@@ -64,7 +64,7 @@
             this.TBsearch.Name = "TBsearch";
             this.TBsearch.Size = new System.Drawing.Size(604, 40);
             this.TBsearch.TabIndex = 1;
-            this.TBsearch.Text = "Default Il text :D";
+            this.TBsearch.TextChanged += new System.EventHandler(this.TBsearch_TextChanged);
             // 
             // Bhide
             // 

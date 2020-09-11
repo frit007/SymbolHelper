@@ -64,7 +64,18 @@ namespace SymbolHelper.Controls {
         }
 
         private void Pdelete_Click(object sender, EventArgs e) {
-            WordStorage.getInstance().removeWord(Id);
+            if (SettingsStorage.getInstance().getSettings().ConfirmDelete) {
+                var confirmResult = MessageBox.Show("Are you sure to delete this item ??",
+                                     "Confirm Delete!!",
+                                     MessageBoxButtons.YesNo);
+                ParentForm.Show();
+                if (confirmResult == DialogResult.Yes) {
+                    WordStorage.getInstance().removeWord(Id);
+                }
+
+            } else {
+                WordStorage.getInstance().removeWord(Id);
+            }
         }
 
         private void TBname_TextChanged(object sender, EventArgs e) {
